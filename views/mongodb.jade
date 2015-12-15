@@ -1,0 +1,102 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}
+  div#divConnect
+    p mongodb url:
+    input#inUrl(value="mongodb://localhost:27017/test", style="width: 300px;")
+    p collection:
+    input#inCollection(value="restaurants")
+    input#btnConn(type="button", value="connect")
+    input#btnDisconn(type="button", value="disconnect")
+    h2#isConnected Not-connected
+  div#divFind
+    div
+      p find all
+      input#btnFindAll(type="button", value="findAll")
+      textarea#txtFindAll(rows="5", cols="50")
+    div
+      p find by id
+      p id:
+      input#inId(value="566e820ddd5f3988050d5c2e", style="width: 300px;")
+      input#btnFindId(type="button", value="findId")
+      textarea#txtFindId(rows="5", cols="50")
+    
+
+  script(type="text/javascript").
+    $(document).ready(function(){
+      $("#divFind").hide();
+      $("#txtFindAll").hide();
+      $("#txtFindId").hide();
+      $("#btnConn").prop('disabled', false);
+      $("#btnDisconn").prop('disabled', true);
+      
+      // connect
+      $("#btnConn").click(function(){
+        $.ajax({
+          url: "./mongodb/connect", 
+          type: "POST",
+          dataType: 'json',
+          data: "inUrl="+$("#inUrl").val()+"&inCollection="+$("#inCollection").val(),
+          success: function(result){
+            $("#isConnected").html(result.status);
+            $("#divFind").show();
+            $("#btnConn").prop('disabled', true);
+            $("#btnDisconn").prop('disabled', false);
+          }
+        });
+      });  //$("#btnConn").click(function()
+      
+      // disconnect
+      $("#btnDisconn").click(function(){
+        $.ajax({
+          url: "./mongodb/disconnect", 
+          type: "POST",
+          dataType: 'json',
+          success: function(result){
+            $("#isConnected").html(result.status);
+            $("#divFind").hide();
+            $("#btnConn").prop('disabled', false);
+            $("#btnDisconn").prop('disabled', true);
+            $("#txtFindAll").val("");
+            $("#txtFindId").val("");
+          }
+        });
+      });  //$("#btnConn").click(function()
+      
+      // findAll
+      $("#btnFindAll").click(function(){
+        $("#txtFindAll").val("");
+        $("#txtFindAll").show();
+        $.ajax({
+          url: "./mongodb/findall", 
+          type: "POST",
+          dataType: 'json',
+          success: function(result){
+            $("#txtFindAll").val(JSON.stringify(result));
+            //$("#txtFindAll").html(JSON.stringify(result));
+            //$.each(result, function(i, field){
+            //  alert(field);
+            //});
+          }
+        });
+      });  //$("#btnFindAll").click(function()
+      
+      // findId
+      $("#btnFindId").click(function(){
+        $("#txtFindId").val("");
+        $("#txtFindId").show();
+        $.ajax({
+          url: "./mongodb/findid", 
+          type: "POST",
+          dataType: 'json',
+          data: "_id="+$("#inId").val(),
+          success: function(result){
+            $("#txtFindId").val(JSON.stringify(result));
+            //$("#txtFindId").html(JSON.stringify(result));
+          }
+        });
+      });  //$("#btnFindAll").click(function()
+      
+    }); //$(document).ready(function()
