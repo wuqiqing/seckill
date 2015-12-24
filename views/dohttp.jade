@@ -14,13 +14,27 @@ block content
     $(document).ready(function(){
       // doPost
       $("#btnPost").click(function(){
+        $("#txtPostRes").val("");
         $.ajax({
-          url: "./dopost", 
+          url: "./dohttp/dopost", 
           type: "POST",
-          data: "no=no",
           success: function(result){
             $("#txtPostRes").val(result);
           }
         });
-      });  //$("#btnConn").click(function()
+      });  //$("#btnPost").click(function()
+      
+      // doGet
+      $("#btnGet").click(function(){
+        $("#txtGetRes").val("");
+        $.ajax({
+          url: "./dohttp/doget", 
+          type: "GET",
+          success: function(result){
+            $("#txtGetRes").val(result);
+          }
+        });
+      });  //$("#btnGet").click(function()
+      
+      
     }); //$(document).ready(function()
