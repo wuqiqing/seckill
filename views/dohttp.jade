@@ -1,0 +1,26 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}
+  div#divPost
+    input#btnPost(type="button", value="POST")
+    textarea#txtPostRes(rows="20", cols="200")
+  div#divGet
+    input#btnGet(type="button", value="GET")
+    textarea#txtGetRes(rows="20", cols="200")
+
+  script(type="text/javascript").
+    $(document).ready(function(){
+      // doPost
+      $("#btnPost").click(function(){
+        $.ajax({
+          url: "./dopost", 
+          type: "POST",
+          data: "no=no",
+          success: function(result){
+            $("#txtPostRes").val(result);
+          }
+        });
+      });  //$("#btnConn").click(function()
+    }); //$(document).ready(function()

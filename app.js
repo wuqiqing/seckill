@@ -8,6 +8,8 @@ var bodyParser = require('body-parser');
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var mongodb = require('./routes/mongodb');
+var nodemailer = require('./routes/nodemailer');
+var dohttp = require('./routes/dohttp');
 
 var app = express();
 
@@ -26,6 +28,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', routes);
 app.use('/users', users);
 app.use('/mongodb', mongodb);
+app.use('/nodemailer', nodemailer);
+app.use('/dohttp', dohttp);
 
 
 // catch 404 and forward to error handler

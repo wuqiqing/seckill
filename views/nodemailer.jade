@@ -1,0 +1,31 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}
+  div#divMail
+    p To:
+    input#inTo(value="wangbowb@cn.ibm.com", style="width: 300px;")
+    p Subject:
+    input#inSubject(value="Hello Tony", style="width: 300px;")
+    p Text:
+    textarea#txtText(rows="5", cols="72") Merry Christmas!
+    input#btnSend(type="button", value="Send")
+    h2#isSent
+    
+  script(type="text/javascript").
+    $(document).ready(function(){
+      // send
+      $("#btnSend").click(function(){
+        $("#isSent").html("Sending......");
+        $.ajax({
+          url: "./nodemailer/send", 
+          type: "POST",
+          dataType: 'json',
+          data: "inTo="+$("#inTo").val()+"&inSubject="+$("#inSubject").val()+"&txtText="+$("#txtText").val(),
+          success: function(result){
+            $("#isSent").html(result.status);
+          }
+        });
+      });  //$("#btnSend").click(function()
+    }); //$(document).ready(function()
