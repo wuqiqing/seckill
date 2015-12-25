@@ -38,8 +38,8 @@ router.post('/send', function(req, res, next) {
 			res.send({status: error});
 			return console.log(error);
 		}
-		console.log('Message sent: ' + info.response);
-		res.send({status: info.response});
+		console.log('Message sent: ' + info);
+		res.send({status: info.message});
 	});
 });
 
