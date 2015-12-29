@@ -1,0 +1,54 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}
+  div#divSend
+    p mqlight url:
+    input#inSendUrl(value="amqp://localhost", style="width: 300px;")
+    p topic:
+    input#inSendTopic(value="news/technology")
+    p message:
+    input#inMsg(value="Hello MQLight!")
+    input#btnSend(type="button", value="Send")
+    p msg sent:
+    textarea#txtSent(rows="5", cols="50")
+  div#divReceive
+    p mqlight url:
+    input#inReceiveUrl(value="amqp://localhost", style="width: 300px;")
+    p topic:
+    input#inReceiveTopic(value="news/technology")
+    input#btnReceive(type="button", value="Subscribe")
+    p msg received (wait for 5 seconds):
+    textarea#txtReceived(rows="5", cols="50")
+    
+
+  script(type="text/javascript").
+    $(document).ready(function(){
+      // send
+      $("#btnSend").click(function(){
+        $.ajax({
+          url: "./mqlight/send", 
+          type: "POST",
+          data: "inSendUrl="+$("#inSendUrl").val()+"&inSendTopic="+$("#inSendTopic").val()+"&inMsg="+$("#inMsg").val(),
+          success: function(result){
+            $("#txtSent").html( $("#txtSent").val() + result.status + "\r");
+          }
+        });
+      });  //$("#btnSend").click(function()
+      
+      // receive
+      $("#btnReceive").click(function(){
+        $("#btnReceive").prop('disabled', true);
+        $.ajax({
+          url: "./mqlight/receive", 
+          type: "POST",
+          data: "inReceiveUrl="+$("#inReceiveUrl").val()+"&inReceiveTopic="+$("#inReceiveTopic").val(),
+          success: function(result){
+            $("#txtReceived").html( $("#txtReceived").val() + result.received + "\r");
+            $("#btnReceive").prop('enabled', true);
+          }
+        });
+      });  //$("#btnReceive").click(function()
+      
+    }); //$(document).ready(function()
