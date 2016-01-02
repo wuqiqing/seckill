@@ -3,6 +3,20 @@ var router = express.Router();
 var mqlight = require('mqlight');
 var recvClient;
 
+// socket.io to update each msg received to the browser
+var app = require('express')();
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
+server.listen(4000);
+
+io.on('connection', function(socket){
+    console.log('a user connected');
+    
+    io.on('disconnect', function(){
+        console.log('user disconnected');
+    });
+});
+
 router.get('/', function(req, res, next) {
 	res.render('mqlight', {
 		title : 'MQ Light'
@@ -24,8 +38,7 @@ router.post('/send', function(req, res, next) {
 	});
 });
 
-router.post('/receive', function(req, res, next) {
-	var dataReceived = "";
+router.post('/subscribe', function(req, res, next) {
 	var service = req.body.inReceiveUrl;
 	var topic = req.body.inReceiveTopic;
 	console.log("inpit param: " + service + " " + topic);
@@ -33,26 +46,20 @@ router.post('/receive', function(req, res, next) {
 	recvClient = mqlight.createClient({service: service});
 	recvClient.on('started', function() {
 	    recvClient.subscribe(topic);
+	    res.send({status: 'subscribed'});
 
 	    recvClient.on('message', function(data, delivery) {
 	        console.log("Message received: " + data);
-	        dataReceived = dataReceived + data + "\r";
-	        //res.send({received: data});
+	        io.emit(topic, data);
 	    });
-	    
-	    // wait 5s to receive messages: 
-	    setTimeout(function() {
-	    	recvClient.unsubscribe(topic);
-	    	 if (dataReceived === "") {
-	    	     console.log("no message received in 5s");
-	    	     res.send({received: "no message received in 5s"});
-	    	 } else{
-	    		 res.send({received: dataReceived});
-	    	 }
-	    }, 5000);
-
 	   
 	});
+});
+
+router.post('/unsubscribe', function(req, res, next) {
+	var topic = req.body.inReceiveTopic;
+	recvClient.unsubscribe(topic);
+	res.send({status: 'unsubscribed'});
 });
 
 module.exports = router;

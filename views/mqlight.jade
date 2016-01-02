@@ -18,13 +18,20 @@ block content
     input#inReceiveUrl(value="amqp://localhost", style="width: 300px;")
     p topic:
     input#inReceiveTopic(value="news/technology")
-    input#btnReceive(type="button", value="Subscribe")
+    input#btnSubscribe(type="button", value="Subscribe")
+    input#btnUnsubscribe(type="button", value="Unsubscribe")
     p msg received (wait for 5 seconds):
     textarea#txtReceived(rows="5", cols="50")
     
+  script(src="/js/socket.io.js").
 
   script(type="text/javascript").
     $(document).ready(function(){
+      $("#btnSubscribe").prop('disabled', false);
+      $("#btnUnsubscribe").prop('disabled', true);
+      
+      var socket = io.connect('http://localhost:4000'); // socket for received msg
+
       // send
       $("#btnSend").click(function(){
         $.ajax({
@@ -37,18 +44,44 @@ block content
         });
       });  //$("#btnSend").click(function()
       
-      // receive
-      $("#btnReceive").click(function(){
-        $("#btnReceive").prop('disabled', true);
+      // subscribe
+      $("#btnSubscribe").click(function(){
+        $("#btnSubscribe").prop('disabled', true);
+        $("#btnUnsubscribe").prop('disabled', false);
+        $("#inReceiveUrl").prop('disabled', true);
+        $("#inReceiveTopic").prop('disabled', true);
+
         $.ajax({
-          url: "./mqlight/receive", 
+          url: "./mqlight/subscribe", 
           type: "POST",
           data: "inReceiveUrl="+$("#inReceiveUrl").val()+"&inReceiveTopic="+$("#inReceiveTopic").val(),
           success: function(result){
-            $("#txtReceived").html( $("#txtReceived").val() + result.received + "\r");
-            $("#btnReceive").prop('enabled', true);
+            // socket.io listens to the received message event
+            socket.on($("#inReceiveTopic").val(), function(msg){
+              $("#txtReceived").html( $("#txtReceived").val() + msg + "\r");
+            });
+            
+            $("#txtReceived").html( $("#txtReceived").val() + result.status + "\r");
           }
         });
-      });  //$("#btnReceive").click(function()
+      });  //$("#btnSubscribe").click(function()
+      
+      // unsubscribe
+      $("#btnUnsubscribe").click(function(){
+        $("#btnSubscribe").prop('disabled', false);
+        $("#btnUnsubscribe").prop('disabled', true);
+        $("#inReceiveUrl").prop('disabled', false);
+        $("#inReceiveTopic").prop('disabled', false);
+
+        $.ajax({
+          url: "./mqlight/unsubscribe", 
+          type: "POST",
+          data: "inReceiveUrl="+$("#inReceiveUrl").val()+"&inReceiveTopic="+$("#inReceiveTopic").val(),
+          success: function(result){
+            socket.removeListener($("#inReceiveTopic").val());
+            $("#txtReceived").html( $("#txtReceived").val() + result.status + "\r");
+          }
+        });
+      });  //$("#btnUnsubscribe").click(function()
       
     }); //$(document).ready(function()
