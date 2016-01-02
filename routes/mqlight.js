@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var mqlight = require('mqlight');
 var recvClient;
+var sendClient;
 
 // socket.io to update each msg received to the browser
 var app = require('express')();
@@ -12,7 +13,13 @@ server.listen(4000);
 io.on('connection', function(socket){
     console.log('a user connected');
     
-    io.on('disconnect', function(){
+    socket.on('disconnect', function(){
+    	if (recvClient) {
+    		console.log(recvClient.state);
+    		recvClient.stop(function(){
+    			console.log("receiver client stopped.");
+    		});
+    	}
         console.log('user disconnected');
     });
 });
@@ -30,9 +37,10 @@ router.post('/send', function(req, res, next) {
 	var msg = req.body.inMsg;
 	console.log("inpit param: " + service + " " + topic + " " + msg);
 	
-	var sendClient = mqlight.createClient({service: service});
+    sendClient = mqlight.createClient({service: service});
 	sendClient.on('started', function() {
 	    sendClient.send(topic, msg);
+	    sendClient.stop();
 	    console.log("message sent: " + msg);
 	    res.send({status: msg});
 	});
